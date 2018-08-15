@@ -41,4 +41,4 @@ $blockchain->addBlock($block);
 Troubleshooting
 ===============
 
-**This projects it's just a proof of concept and doesn't to be used in production environment.**
+**This projects it's just a proof of concept and doesn't to be used at production environment.**
