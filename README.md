@@ -38,5 +38,7 @@ $blockchain->addBlock($block);
 
 ```
 
+Troubleshooting
+===============
 
 **This projects it's just a proof of concept and doesn't must to be used in production environment.**
