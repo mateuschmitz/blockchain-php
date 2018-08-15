@@ -1,0 +1,16 @@
+{
+    "name": "mateuschmitz/blockchain-php",
+    "homepage": "https://github.com/mateuschmitz/blockchain-php",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.6.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "src/"
+        }
+    }
+}
