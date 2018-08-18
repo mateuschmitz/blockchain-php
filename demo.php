@@ -7,11 +7,14 @@
 
 require('./vendor/autoload.php');
 
+define('ROOT_PATH', __DIR__);
+
 $blockchain = new \BlockchainPHP\Blockchain([
-    'blocks_dir'            => __DIR__ . './data/',
-    'indexes_dir'           => __DIR__ . './data/',
+    'name'                  => 'demo',
+    'blocks_dir'            => __DIR__ . '/data/',
+    'indexes_dir'           => __DIR__ . '/data/',
     'hash_algorithm'        => 'sha256',
-    'hash_algorithm_cycles' => 2,
+    'hash_cycles' => 2,
     'block_max_size'        => '5MB',
     'blocks_file_max_size'  => '500MB',
     'blocks_file_prefix'    => 'demo',
