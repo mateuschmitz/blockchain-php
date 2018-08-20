@@ -28,7 +28,7 @@ Objetivos do projeto
 -- Dificuldade (número de ZEROS no ińício da string. default: no)
 
 - Atributos default do bloco:
--- version
+-- version (hash with configs)
 -- index
 -- timestamp
 -- prevhash
