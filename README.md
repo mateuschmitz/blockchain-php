@@ -18,9 +18,9 @@ require('./vendor/autoload.php');
 
 //first we instance the blockchain
 $blockchain = new \BlockchainPHP\Blockchain([
-    'name'                  => 'BlockchainPHP',    // blockchain's name
-    'version'               => '1',                // blockchain's version - optional
-    'blocks_dir'            => __DIR__ . '/data/', // blocks will be saved here 
+    'name'       => 'BlockchainPHP',    // blockchain's name
+    'version'    => '1',                // blockchain's version - optional
+    'blocks_dir' => __DIR__ . '/data/', // blocks will be saved here 
 ]);
 
 // then, we create the block
