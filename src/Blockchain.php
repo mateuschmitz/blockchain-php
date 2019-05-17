@@ -11,19 +11,19 @@ class Blockchain
 {
     const DEFAULT_VERSION = '1';
 
-    const DEFAULT_BLOCK_MAX_SIZE = '10MB';
+    const MAGIC_NUMBER = 0x7FFFFFFF; // 2147483647
 
-    const DEFAULT_BLOCKS_FILE_MAX_SIZE = '500MB';
+    const HASH_LENGTH = 32; // bytes
+
+    const HEADER_LENGTH = 77; // 4+4+4+1+32+32 bytes
 
     private $name;
 
-    private $version = self::DEFAULT_VERSION;
+    private $version;
 
     private $blocksDir;
 
-    private $blockMaxSize = self::DEFAULT_BLOCK_MAX_SIZE;
-
-    private $blocksFileMaxSize = self::DEFAULT_BLOCKS_FILE_MAX_SIZE;
+    private $blocksFile;
 
     /**
      * Sets up all the options to the blockchain and instance the chain
@@ -32,82 +32,140 @@ class Blockchain
      */
     public function __construct(array $settings)
     {
-        $this->setUp($settings);
+        $this->setUp($settings)->initializeFiles();
     }
 
-    private function validateSetUp()
+    /**
+     * Sets up the blockchain attributes
+     * 
+     * @param array $settings
+     * @return self
+     */
+    private function setUp(array $settings)
     {
-        if (empty($this->name)) {
+        if (!isset($settings['name']) || empty($settings['name'])) {
             throw new \InvalidArgumentException("Invalid 'name'");
         }
 
-        if (empty($this->version)) {
-            throw new \InvalidArgumentException("Invalid 'version'");
-        }
-
-        if (!is_writable($this->blocksDir)) {
+        if (!isset($settings['blocks_dir']) || !is_writable($settings['blocks_dir'])) {
             throw new \LogicException("Invalid 'blocks_dir'");
         }
 
-        if (!preg_match('/^([0-9]){1,4}(KB|MB|GB|TB)$/', $this->blockMaxSize)) {
-            throw new \LengthException("Invalid 'block_max_size'");
-        }
-
-        if (!preg_match('/^([0-9]){1,4}(KB|MB|GB|TB)$/', $this->blocksFileMaxSize)) {
-            throw new \LengthException("Invalid 'blocks_file_max_size'");
-        }
-
-        return true;
-    }
-
-    private function setUp(array $settings)
-    {
-        if (isset($settings['name']) && !empty($settings['name'])) {
-            $this->name = $settings['name'];
-        }
-
-        if (isset($settings['version']) && !empty($settings['version'])) {
-            $this->version = $settings['version'];
-        }
-
-        if (isset($settings['blocks_dir']) && !empty($settings['blocks_dir'])) {
-            $this->blocksDir = $settings['blocks_dir'];
-        }
-
-        if (isset($settings['block_max_size']) && !empty($settings['block_max_size'])) {
-            $this->blockMaxSize = $settings['block_max_size'];
-        }
-
-        if (isset($settings['blocks_file_max_size']) && !empty($settings['blocks_file_max_size'])) {
-            $this->blocksFileMaxSize = $settings['blocks_file_max_size'];
-        }
-
-        $this->validateSetUp();
+        $this->name      = $settings['name'];
+        $this->version   = $settings['version'] ?? self::DEFAULT_VERSION;
+        $this->blocksDir = $settings['blocks_dir'];
 
         return $this;
     }
 
-    private function getLastPositionBlock()
-    {}
+    /**
+     * Initialize the files needed
+     * 
+     * @return void
+     */
+    private function initializeFiles()
+    {
+        $this->blocksFile = $this->blocksDir . DS . "{$this->name}.{$this->version}.dat";
+        if (!file_exists($this->blocksFile)) {
+            fclose(fopen($this->blocksFile, 'wb'));
+        }
 
-    private function getBlock()
-    {}
+        if (!is_writable($this->blocksFile)) {
+            throw new \UnexpectedValueException("Can't create blocks file at '{$this->blocksFile}'", 1);
+        }
+    }
 
+    /**
+     * Add a new block to the chain
+     * 
+     * @param Block $block
+     * @return Block the new block added
+     */
     public function addBlock(Block $block)
-    {}
+    {
+        $previousBlock = $this->getLastBlock();
+        var_dump($previousBlock);
 
-    public function getBlocks()
-    {}
+        if ($previousBlock instanceOf Block) {
+            $block->setPreviousHash($previousBlock->getBlockHash());
+        }
 
+        $block->generateBlockHash();
+
+        // here we write the block into file
+        $fo = fopen($this->blocksFile, 'ab');
+        fwrite($fo, pack('V', self::MAGIC_NUMBER), 4);
+        fwrite($fo, chr($this->version), 1);
+        fwrite($fo, pack('V', $block->getTimestamp()), 4);
+        fwrite($fo, hex2bin($block->getPreviousHash()), self::HASH_LENGTH);
+        fwrite($fo, hex2bin($block->getBlockHash()), self::HASH_LENGTH);
+        fwrite($fo, pack('V', $block->getDataLength()), 4);
+        fwrite($fo, $block->getData(), $block->getDataLength());
+        fclose($fo);
+
+        return $block;
+    }
+
+    /**
+     * Get the last block added to the chain
+     * 
+     * @return Block
+     */
     public function getLastBlock()
-    {}
+    {
+        clearstatcache();
 
-    public function getBlockByHash($hash)
-    {}
+        // in this case we don't have any blocks saved
+        if (filesize($this->blocksFile) == 0) {
+            return null;
+        }
 
-    public function getBlockByIndex($index)
-    {}
+        $fo = fopen($this->blocksFile, 'rb');
+        fseek($fo, -113, SEEK_END);
 
-    public function setBlockValidation(callable $callable)
-    {}
+        $header = fread($fo, self::HEADER_LENGTH);
+        if (unpack('V', substr($header,-4,4))[1] > Block::BLOCK_DATA_LIMIT) {
+            fseek($fo, 0);
+            $header = fread($fo, self::HEADER_LENGTH);
+        }
+
+        $values = Utils::unpackValues($header);
+        return (new Block(fread($fo, $values['dataLength'])))
+            ->setTimestamp($values['timestamp'])
+            ->setPreviousHash($values['previousHash'])
+            ->setBlockHash($values['blockHash'])
+            ->setDataLength($values['dataLength']);
+    }
+
+    /**
+     * Generate the genesis Block
+     * 
+     * @return Block
+     */
+    public function generateGenesisBlock()
+    {
+        $genesis = new Block('Genesis Block');
+        $genesis->generateBlockHash();
+        return $this->addBlock($genesis);
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    public function getBlocksDir()
+    {
+        return $this->blocksDir;
+    }
+
+    public function getBlocksFile()
+    {
+        return $this->blocksFile;
+    }
 }
