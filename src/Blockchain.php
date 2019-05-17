@@ -84,8 +84,6 @@ class Blockchain
     public function addBlock(Block $block)
     {
         $previousBlock = $this->getLastBlock();
-        var_dump($previousBlock);
-
         if ($previousBlock instanceOf Block) {
             $block->setPreviousHash($previousBlock->getBlockHash());
         }
