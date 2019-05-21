@@ -8,16 +8,26 @@
 require('./vendor/autoload.php');
 
 define('ROOT_PATH', __DIR__);
+define('DS', DIRECTORY_SEPARATOR);
+date_default_timezone_set('America/Sao Paulo');
 
 $blockchain = new \BlockchainPHP\Blockchain([
-    'name'                 => 'BlockchainPHP',
-    'version'              => 5,
-    'blocks_dir'           => __DIR__ . '/data/',
-    'block_max_size'       => '5MB',
-    'blocks_file_max_size' => '500MB'
+    'name'       => 'BlockchainPHP',
+    'version'    => 1,
+    'blocks_dir' => __DIR__ . '/data/'
 ]);
 
-$block = new \BlockchainPHP\Block('This is the content of the block');
-$block = new \BlockchainPHP\Block('This is the content of the block', strtotime('now'));
+$faker = Faker\Factory::create();
 
-$blockchain->addBlock($block);
+for ($i = 1; $i <= 10; $i++) {
+	
+	$block = new \BlockchainPHP\Block([
+		'author' => 'Mateus Schmitz', 
+		'content' => $faker->realText(mt_rand(10, 1000))
+	]);
+
+	$blockchain->addBlock($block);
+}
+
+\BlockchainPHP\Utils::dumpBlockchain($blockchain);
+

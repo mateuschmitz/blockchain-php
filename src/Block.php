@@ -37,7 +37,9 @@ class Block
         $this->timestamp  = strtotime('now');
 
         if ($this->dataLength > self::BLOCK_DATA_LIMIT) {
-            throw new \InvalidArgumentException("'Data' field can't have more than " . self::BLOCK_DATA_LIMIT . " characters", 1);
+            throw new \InvalidArgumentException(
+                "'Data' field can't have more than " . self::BLOCK_DATA_LIMIT . " characters"
+            );
         }
     }
 

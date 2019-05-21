@@ -36,7 +36,7 @@ class Utils
             echo "-------------------\n";
             echo "Timestamp:     ". date("d/m/Y H:i:s", $values['timestamp']) . "(" . $values['timestamp'] . ")\n";
             echo "Previous Hash: ". $values['previousHash'] . "\n";
-            echo "Block Hash:    " . $values['hash'] . "\n";
+            echo "Block Hash:    " . $values['blockHash'] . "\n";
             echo "Data Length:   " . $values['dataLength'] . "\n";
             echo "Data: ". $data. "\n\n";
         }
