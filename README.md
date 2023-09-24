@@ -39,4 +39,4 @@ TODO
 Troubleshooting
 ===============
 
-**This project is just a proof of concept and doesn't should be used in at production environment.**
+**This project is a proof of concept and shouldn't be used in a production environment.**
