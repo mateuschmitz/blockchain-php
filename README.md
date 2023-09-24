@@ -16,14 +16,14 @@ Usage
 
 require('./vendor/autoload.php');
 
-//first we instance the blockchain
+//First we instance the blockchain
 $blockchain = new \BlockchainPHP\Blockchain([
     'name'       => 'BlockchainPHP',    // blockchain's name
     'version'    => '1',                // blockchain's version - optional
     'blocks_dir' => __DIR__ . '/data/', // blocks will be saved here 
 ]);
 
-// then, we create the block
+//Then, we create the block
 $block = new \BlockchainPHP\Block('This is the content of the block');
 
 // so, we save the block into the chain
@@ -39,4 +39,4 @@ TODO
 Troubleshooting
 ===============
 
-**This projects it's just a proof of concept and doesn't to be used at production environment.**
+**This project is just a proof of concept and doesn't should be used in at production environment.**
